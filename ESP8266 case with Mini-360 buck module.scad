@@ -11,6 +11,11 @@ Material="PLA";//[PLA, ABS, TPU, PETG]
 /* [Hidden] */
 
 // General sizes
+x=0;
+y=1;
+z=2;
+fudge=.02;  //mm, used to keep removal areas non-congruent
+
 wallThickness=1.5;
 wireChannelWidth=5.6;
 wireChannelDepth=2.6;
@@ -18,10 +23,21 @@ wireChannelLength=10;
 strainReliefLength=4;
 strainReliefThickness=2;
 mountingScrewDiameter=3.5;
+lowerCaseThickness=8; 
+caseTopThickness=wallThickness; 
+canLocation=[10.4, 8.4, lowerCaseThickness-fudge/2];
+canSize=[16.1, 12.5, caseTopThickness+fudge];
+
 mount=wallThickness*2+mountingScrewDiameter;
 
+//top locating pins
+pin1Location=[27, 40.5, lowerCaseThickness*.67];
+pin2Location=[23, 30.5, lowerCaseThickness*.67];
+pin3Location=[37.5, 30.5, lowerCaseThickness*.67];
+pinDiameter=3;
+
 //space for ESP8266
-espThickness=2.3;
+espThickness=4.3;
 espLength=35+wireChannelWidth/4; //room for one power wire to 3v3
 espWidth=26.5;
 wireChannelGroundX=wallThickness+espLength-11.4;
@@ -37,8 +53,18 @@ mini360LocationY=espWidth+wallThickness*2;
 //case
 caseWidth=espWidth+mini360Width+wallThickness*3;
 caseLength=espLength+wallThickness*2;
-lowerCaseThickness=6; 
-caseTopThickness=3; 
+
+//text
+text1Location=[4.5,caseWidth-5,lowerCaseThickness+caseTopThickness-0.6];
+text2Location=[4.5,caseWidth-10,lowerCaseThickness+caseTopThickness-0.6];
+text3Location=[4.5,caseWidth-15,lowerCaseThickness+caseTopThickness-0.6];
+textSize=3.3;
+
+//Lid latches
+latchSize=[5,1.2,4];
+latch1Location=[caseLength/2-latchSize[x]/2,0-latchSize[y],lowerCaseThickness+caseTopThickness-latchSize[z]];
+latch2Location=[caseLength/2+latchSize[x]/2,caseWidth+latchSize[y],lowerCaseThickness+caseTopThickness-latchSize[z]];
+latchNubDiameter=0.6;
 
 //LED
 ledLength=0.8;
@@ -61,9 +87,9 @@ resetButtonThickness=0.85;
 resetButtonLocationY=resetButtonBodyLocationY-resetButtonWidth;
 resetButtonRodDiameter=2.8;
 resetButtonRodLength=wallThickness+3;
-resetButtonRodLocationX=34.3;
+resetButtonRodLocationX=34.1;
 resetButtonRodLocationY=resetButtonRodLength;
-resetButtonRodLocationZ=lowerCaseThickness-espThickness;
+resetButtonRodLocationZ=lowerCaseThickness-espThickness-resetButtonRodDiameter/3;
 resetExtensionDiameter=resetButtonRodDiameter-0.3;
 resetExtensionLength=wallThickness*2.5;
 
@@ -77,6 +103,9 @@ usbOpeningThickness=lowerCaseThickness;
 usbOpeningLocationX=espLength+.4;
 usbOpeningLocationY=usbLocationY;
 
+//rear support for ESP board
+supportSize=[1.6, espWidth-5 ,1.6];
+supportLocation=[5, wallThickness+2.5, lowerCaseThickness-4.4];
 
 shrink=[
   ["ABS",0.7],
@@ -86,13 +115,9 @@ shrink=[
   ];
 temp=search([Material],shrink);
 shrinkPCT=shrink[temp[0]][1];
-fudge=.02;  //mm, used to keep removal areas non-congruent
 shrinkFactor=1+shrinkPCT/100;
 $fn=200;
 nozzleDiameter=.4;
-x=0;
-y=1;
-z=2;
 
 module go()
   {
@@ -105,6 +130,122 @@ module go()
   }
 
 module solids()
+  {
+  bottom();
+
+  //take the top off for easier printing
+  translate([-10,0,lowerCaseThickness+caseTopThickness])
+    {
+    rotate([0,180,0])
+      {
+      top();
+      }
+    }
+  }
+
+module top()
+  {
+  difference()
+    {
+    union()
+      {
+      //The top body
+      translate([0,0,lowerCaseThickness])
+        {
+        cube([caseLength,caseWidth,caseTopThickness]);
+        }
+        
+      //The pins to help locate the top  
+      translate(pin2Location)
+        {
+        cylinder(d=pinDiameter*.85, h=lowerCaseThickness/3);
+        }
+      translate(pin1Location)
+        {
+        cylinder(d=pinDiameter*.85, h=lowerCaseThickness/3);
+        }
+
+      //First latch
+      translate(latch1Location)
+        {
+        latch();
+        }
+ 
+      //Second latch
+      translate(latch2Location)
+        {
+        rotate([0,0,180])
+          {
+          latch();
+          }
+        }
+      }
+      
+    //make room for the mounting screws
+    translate([0-mountingScrewDiameter/2,0-mountingScrewDiameter/2,lowerCaseThickness])
+      cylinder(d=mount, h=wallThickness+fudge);
+    translate([caseLength+mountingScrewDiameter/2,0-mountingScrewDiameter/2,lowerCaseThickness])
+      cylinder(d=mount, h=wallThickness+fudge);
+    translate([0-mountingScrewDiameter/2,caseWidth+mountingScrewDiameter/2,lowerCaseThickness])
+      cylinder(d=mount, h=wallThickness+fudge);
+    translate([caseLength+mountingScrewDiameter/2,caseWidth-mount/2,lowerCaseThickness])
+      cylinder(d=mount, h=wallThickness+fudge);
+    
+    //The hole for the RF can
+    translate(canLocation)
+      {
+      cube(canSize);
+      }
+
+    //The text
+    translate(text1Location)
+      {
+      linear_extrude(1)
+        {
+        text("Remove power", size=textSize);
+        }
+      }
+    translate(text2Location)
+      {
+      linear_extrude(1)
+        {
+        text("before plugging", size=textSize);
+        }
+      }
+    translate(text3Location)
+      {
+      linear_extrude(1)
+        {
+        text("into USB!", size=textSize);
+        }
+      }
+    }
+  }
+
+module latch()
+  {
+  cube(latchSize);
+  translate([0,latchSize[y],latchNubDiameter/2])
+    {
+    rotate([0,90,0])
+      {
+      cylinder(d=latchNubDiameter, h=latchSize[x]);
+      }
+    }
+  }
+
+module latchDeboss()
+  {
+  translate([0,latchSize[y],latchNubDiameter/2])
+    {
+    rotate([0,90,0])
+      {
+      cylinder(d=latchNubDiameter, h=latchSize[x]);
+      }
+    }
+  }
+  
+module bottom()
   {
   // the case bottom half
   cube([caseLength,caseWidth,lowerCaseThickness]);
@@ -135,11 +276,11 @@ module solids()
 module holes()
   {
   //the ESP8266 
-  translate([wallThickness,wallThickness,lowerCaseThickness-espThickness])
+  translate([wallThickness,wallThickness,lowerCaseThickness-espThickness]) 
     {
     cube([espLength,espWidth,espThickness+fudge]);
     }
-  translate([wallThickness+wireChannelWidth/4,wallThickness,wallThickness])
+  translate([wallThickness+wireChannelWidth/4,wallThickness,wallThickness+1])//+1 to get the can into fresh air
     {
     import("ESP8266-D1-mini.stl");
     }
@@ -206,7 +347,7 @@ module holes()
     cylinder(d=mountingScrewDiameter, h=lowerCaseThickness+fudge);
 
   //reset button
-  translate([resetButtonRodLocationX,resetButtonRodLocationY-fudge,resetButtonRodLocationZ])
+  translate([resetButtonRodLocationX,resetButtonRodLocationY-fudge,resetButtonRodLocationZ+1]) //+1 because ESP is raised by +1
     {
     rotate([90,0,0])
       {
@@ -214,17 +355,47 @@ module holes()
       cylinder(d=resetButtonRodDiameter*1.6,h=resetButtonRodLength-1.5);
       }
     }
-    
+
+  //The holes for the pins that help locate the top
+  translate([pin2Location[x],pin2Location[y],0])
+    {
+    cylinder(d=pinDiameter, h=lowerCaseThickness);
+    }
+  translate([pin1Location[x],pin1Location[y],0])
+    {
+    cylinder(d=pinDiameter, h=lowerCaseThickness);
+    }
+
+  //Lid latch debossment 1
+  translate(latch1Location)
+    {
+    latchDeboss();
+    }
+
+  //Lid latch debossment 2
+  translate(latch2Location)
+    {
+    rotate([0,0,180])
+      {
+      latchDeboss();
+      }
+    }
   }
 
 module extra()
   {
   //The reset button extension
-  translate([resetButtonRodLocationX,0-5,0])
+  translate([resetButtonRodLocationX-5,0-5,0])
     {
     cylinder(d=resetExtensionDiameter*1.4,h=0.6);
     cylinder(d=resetExtensionDiameter,h=resetExtensionLength);
     }  
+
+  //support for rear of esp board
+  translate(supportLocation)
+    {
+    cube(supportSize);
+    }
   }
 
 module cornerMount(angle)
@@ -255,11 +426,8 @@ module cornerMount(angle)
           }
         }
       }
-
     }
   }
     
 go();
-
-echo(caseLength);
-echo(caseWidth);
+//extra();

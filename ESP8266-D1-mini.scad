@@ -27,7 +27,7 @@ canWidth=12;
 canThickness=2.4;
 canLocationX=7.7; //on the wifi board, from the antenna side
 canLocationY=2;   //on the wifi board
-
+ 
 //LED
 ledLength=0.8;
 ledWidth=1.4;
@@ -53,7 +53,7 @@ resetButtonLocationY=resetButtonBodyLocationY-resetButtonWidth;
 //USB port
 usbLength=6;
 usbWidth=9;
-usbThickness=2.8;
+usbThickness=2.9;
 usbLocationX=28;
 usbLocationY=boardWidth/2-usbWidth/2; //centered in Y direction
 
