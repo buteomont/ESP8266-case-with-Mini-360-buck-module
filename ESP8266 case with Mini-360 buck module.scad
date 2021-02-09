@@ -1,5 +1,5 @@
-//This is a model of the ESP8266 D1 mini 
-//It can be used for case design.
+//This is a case for the ESP8266 D1 mini 
+//with room for a MH-Mini-360 buck converter
 
 /* [Size Adjustments] */
 //This comment will describe the variable below it in the customizer
@@ -27,6 +27,7 @@ lowerCaseThickness=8;
 caseTopThickness=wallThickness; 
 canLocation=[10.4, 8.4, lowerCaseThickness-fudge/2];
 canSize=[16.1, 12.5, caseTopThickness+fudge];
+solderHoleDiameter=2.5;
 
 mount=wallThickness*2+mountingScrewDiameter;
 
@@ -296,6 +297,16 @@ module holes()
   translate([mini360LocationX,mini360LocationY,lowerCaseThickness-mini360Thickness+fudge])
     {
     cube([mini360Length,mini360Width,mini360Thickness]);
+
+    //make room for the solder connections
+    translate([solderHoleDiameter/2,solderHoleDiameter/2,0-2])
+      cylinder(d=solderHoleDiameter,h=2+fudge);
+    translate([mini360Length-solderHoleDiameter/2,solderHoleDiameter/2,0-2])
+      cylinder(d=solderHoleDiameter,h=2+fudge);
+    translate([solderHoleDiameter/2,mini360Width-solderHoleDiameter/2,0-2])
+      cylinder(d=solderHoleDiameter,h=2+fudge);
+    translate([mini360Length-solderHoleDiameter/2,mini360Width-solderHoleDiameter/2,0-2])
+      cylinder(d=solderHoleDiameter,h=2+fudge);
     }
 
   //12v power wire channel
