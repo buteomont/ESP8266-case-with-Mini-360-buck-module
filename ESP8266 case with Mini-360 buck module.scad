@@ -18,8 +18,10 @@ fudge=.02;  //mm, used to keep removal areas non-congruent
 
 wallThickness=1.5;
 wireChannelWidth=5.6;
-wireChannelDepth=2.6;
+wireChannelDepth=3.3;
 wireChannelLength=10;
+wireChannelRampLength=5;
+wireChannelRampDepth=1.7;
 strainReliefLength=4;
 strainReliefThickness=2;
 mountingScrewDiameter=3.5;
@@ -323,14 +325,19 @@ module holes()
             lowerCaseThickness-wireChannelDepth+fudge])
     {
     cube([wireChannelWidth,wireChannelLength*2,wireChannelDepth]);
+
+    //add a ramp for ESP lower side access
+    translate([0,0,-wireChannelRampDepth])
+      rotate([20,0,0])
+        cube([wireChannelWidth, wireChannelRampLength, wireChannelDepth]);
     }
     
   //small wire channel for 3.3v power  
   translate([wallThickness,
             espWidth+wallThickness-fudge,
-            lowerCaseThickness-wireChannelDepth/2+fudge]) 
+            lowerCaseThickness-wireChannelDepth+fudge]) 
     {
-    cube([wireChannelWidth/4,wireChannelLength,wireChannelDepth/2]);
+    cube([wireChannelWidth/4,wireChannelLength,wireChannelDepth]);
     }
     
   //small wire channel for ground wire  
