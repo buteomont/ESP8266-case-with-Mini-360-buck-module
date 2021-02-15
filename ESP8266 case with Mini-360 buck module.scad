@@ -17,7 +17,7 @@ z=2;
 fudge=.02;  //mm, used to keep removal areas non-congruent
 
 wallThickness=1.5;
-wireChannelWidth=5.6;
+wireChannelWidth=6;
 wireChannelDepth=3.3;
 wireChannelLength=10;
 wireChannelRampLength=5;
@@ -314,9 +314,9 @@ module holes()
   //12v power wire channel
   translate([mini360LocationX+mini360Length-fudge/2,
             mini360LocationY+mini360Width/2-wireChannelWidth/2,
-            lowerCaseThickness-wireChannelDepth/2+fudge])
+            lowerCaseThickness-wireChannelDepth+fudge])
     {
-    cube([wireChannelLength+fudge,wireChannelWidth,wireChannelDepth/2]);
+    cube([wireChannelLength+fudge,wireChannelWidth,wireChannelDepth]);
     }
 
   //Main wire channel
@@ -327,9 +327,20 @@ module holes()
     cube([wireChannelWidth,wireChannelLength*2,wireChannelDepth]);
 
     //add a ramp for ESP lower side access
-    translate([0,0,-wireChannelRampDepth])
+    translate([0-wireChannelWidth*.65,0,-wireChannelRampDepth*.6])
       rotate([20,0,0])
-        cube([wireChannelWidth, wireChannelRampLength, wireChannelDepth]);
+        cube([wireChannelWidth*1.65, wireChannelRampLength, wireChannelDepth]);
+
+    //add chamfers for wires entering and exiting the wire channel
+    translate([0,wireChannelWidth*1.35,0])
+      rotate([0,0,45])
+        cube([wireChannelWidth/2,wireChannelWidth/2,wireChannelDepth]);
+    translate([0-wireChannelLength,wireChannelWidth*1.35,0])
+      rotate([0,0,45])
+        cube([wireChannelWidth/2,wireChannelWidth/2,wireChannelDepth]);
+    translate([0-wireChannelLength,wireChannelWidth/2.35,0])
+      rotate([0,0,45])
+        cube([wireChannelWidth/2,wireChannelWidth/2,wireChannelDepth]);
     }
     
   //small wire channel for 3.3v power  
@@ -340,10 +351,10 @@ module holes()
     cube([wireChannelWidth/4,wireChannelLength,wireChannelDepth]);
     }
     
-  //small wire channel for ground wire  
-  translate([wireChannelGroundX-0.5,wireChannelGroundY-fudge,lowerCaseThickness-wireChannelDepth/2]) //0.5 for the board tolerance
+  //Add room for more wires to ESP  
+  translate([wireChannelGroundX-0.5,wireChannelGroundY-fudge,lowerCaseThickness-wireChannelDepth]) //0.5 for the board tolerance
     {
-    cube([wireChannelWidth/4,wireChannelLength,wireChannelDepth/2+fudge]);
+    cube([wireChannelWidth,wireChannelLength,wireChannelDepth+fudge]);
     }
   
   //the nub on the end of the strain relief
@@ -377,11 +388,11 @@ module holes()
   //The holes for the pins that help locate the top
   translate([pin2Location[x],pin2Location[y],0])
     {
-    cylinder(d=pinDiameter, h=lowerCaseThickness);
+    cylinder(d=pinDiameter, h=lowerCaseThickness+fudge);
     }
   translate([pin1Location[x],pin1Location[y],0])
     {
-    cylinder(d=pinDiameter, h=lowerCaseThickness);
+    cylinder(d=pinDiameter, h=lowerCaseThickness+fudge);
     }
 
   //Lid latch debossment 1
